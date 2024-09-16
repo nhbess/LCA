@@ -1,0 +1,6 @@
+numpy
+tqdm
+matplotlib
+imageio
+scipy
+cma
