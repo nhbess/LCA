@@ -85,9 +85,9 @@ if __name__ == '__main__':
     Y = 10
     X = Y   #int(Y/ratio)
     RUNS = X
-    N_PRODUCTION_RULES = 10
-    N_SYMBOLS = 10
-    
+    N_PRODUCTION_RULES = 5
+    N_SYMBOLS = 5
+
     for run in range(1):
         b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=N_PRODUCTION_RULES)
         for i in range(Y):
