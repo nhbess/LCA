@@ -12,85 +12,85 @@ import Visuals
 np.set_printoptions(precision=2, suppress=True)
 
 class LS:
-    def __init__(self, n:int, m:int, n_production_rules:int = 2, production_rules = None) -> None:
-        if production_rules is not None:    self.P = production_rules
+    def __init__(self, n:int, m:int, n_symbols:int, n_production_rules:int = 2, production_rules = None) -> None:
+        self.symbols = np.arange(n_symbols)
+        
+        if production_rules is not None:    self.P = self._discretize_production_rules(production_rules)
         else:                               self.P = self._production_rules(n_production_rules)
         
         self.B = np.zeros((n,m), dtype=int)
         self.B[n//2, m//2] = 1
         self.data = []
 
+    def _discretize_production_rules(self, production_rules) -> list:
+        def map_to_symbols(array):
+            array = np.abs(array)  # Take the absolute value
+            mapped = np.floor(array * len(self.symbols)).astype(int)
+            mapped[mapped == len(self.symbols)] = len(self.symbols) - 1  # Handle edge case
+            return mapped
 
-    def _find_pattern(self, grid, pattern):
-        pattern_rows, pattern_cols = pattern.shape
-        padded_grid = np.pad(grid, ((pattern_rows - 1, pattern_rows - 1), (pattern_cols - 1, pattern_cols - 1)), mode='wrap')
-        
-        grid_rows, grid_cols = grid.shape
-        
-        M = np.zeros((grid_rows, grid_cols), dtype=int)
-        for i in range(1,grid_rows+1):
-            for j in range(1, grid_cols+1):
-                sub_grid = padded_grid[i:i + pattern_rows, j:j + pattern_cols] 
-                if np.array_equal(sub_grid, pattern):
-                    M[i - 1, j - 1] = 1
-        
-        return M
+        P = [[map_to_symbols(rule[0]), map_to_symbols(rule[1])] for rule in production_rules]
+        return P
 
+    
     def _production_rules(self, n_production_rules) -> dict:
         P = []
         P.append([  np.array([[0, 0, 0], 
                               [0, 1, 0], 
                               [0, 0, 0]]), 
-                    np.random.random((3, 3))*2-1]) #First rule
+                    np.random.choice(self.symbols, (3, 3))]) #First rule
 
         for _ in range(n_production_rules):
-            reactants = np.random.random((3, 3))*2 - 1
-            products = np.random.random((3, 3))*2 - 1
+            reactants = np.random.choice(self.symbols, (3, 3))
+            products = np.random.choice(self.symbols, (3, 3))
             P.append([reactants, products])
 
         return P
     
+    def _find_matches(self, M:np.array, m:np.array) -> list:
+        M_rows, M_cols = M.shape
+        m_rows, m_cols = m.shape
+
+        matches = []
+        for i in range(M_rows - m_rows + 1):
+            for j in range(M_cols - m_cols + 1):
+                subgrid = M[i:i+m_rows, j:j+m_cols]        
+                if np.array_equal(subgrid, m):
+                    matches.append((i, j))
+        return matches
+
+    def _replace_pattern(self, M, m, matches):
+        m_rows, m_cols = m.shape
+        for match in matches:
+            i, j = match
+            M[i:i+m_rows, j:j+m_cols] = m        
+        return M
+
     def update(self) -> None:
         S = self.B.copy()
         for rule in self.P:
             reactant, product = rule
-            
-            #print(f'reactant:\n{reactant}')
-            #print(f'product:\n{product}')
-            reactant = reactant.clip(0, 1)
-            reactant = np.where(reactant > 0, 1, np.round(reactant,1))
+            matches = self._find_matches(S, reactant)
+            if len(matches) > 0:
+                S = self._replace_pattern(S, product, matches)
 
-            product = product.clip(0, 1)
-            product = np.where(product > 0, 1, np.round(product,1))
-            #print(f'reactant:\n{reactant}')
-            #print(f'product:\n{product}')
-
-            M = self._find_pattern(S, reactant)
-            if sum(sum(M)) == 0:
-                continue
-            
-            N = convolve(M, product, mode='wrap')
-            #print(f'N:\n{N}')
-            #print(f'B:\n{self.B}')
-            self.B[N == 1] = 1
-
+        self.B = S
         self.data.append(self.B.copy())
-
-            
 
 if __name__ == '__main__':
     pass
     seed = np.random.randint(0, 100000000) 
-    
     np.random.seed(seed)
     print(f'Seed: {seed}')
     Y = 10
     X = Y   #int(Y/ratio)
     RUNS = X
-    N_PRODUCTION_RULES = 1
-    for run in range(1):    
-        b = LS(X, Y, N_PRODUCTION_RULES)
-        for i in range(Y*2):
+    N_PRODUCTION_RULES = 10
+    N_SYMBOLS = 10
+    
+    for run in range(1):
+        b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=N_PRODUCTION_RULES)
+        for i in range(Y):
             b.update()
 
         data = b.data

@@ -12,7 +12,7 @@ np.set_printoptions(precision=2, suppress=True)
 
 
 
-def _reward_function_individual(individual:np.array, target:np.array): 
+def _reward_function_individual(individual:np.array, target:np.array, n_symbols:int, n_updates:int) -> float: 
     #print(target)
     #print(individual)
 
@@ -21,25 +21,18 @@ def _reward_function_individual(individual:np.array, target:np.array):
     rules = np.copy(individual)
     rules = rules.reshape(-1, 2, 3, 3) # [N_PRODUCTION_RULES, reactant and products, 3, 3]
 
-
-    b = LS(X, Y, production_rules=rules)
-    for i in range(X):
+    b = LS(n=X, m=Y, n_symbols=n_symbols, production_rules=rules)
+    for i in range(n_updates):
             b.update()
     
     result = b.data
     loss = np.sum(np.square(target - result[-1]))
-    #errors_frames = []
-    #for frame in result:
-    #    loss = np.sum(np.square(target - frame))
-    #    errors_frames.append(loss)
-    #loss = np.mean(errors_frames)
     reward = 1 / (1 + loss)
     return reward
 
-def evolve(target:np.array, num_params:int, n_generations=100, popsize=20, folder:str = 'test'):
+def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
     solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
-    
     results = {'BEST': [],'REWARDS': []}
     
     for g in range(n_generations):
@@ -47,7 +40,7 @@ def evolve(target:np.array, num_params:int, n_generations=100, popsize=20, folde
         fitness_list = np.zeros(solver.popsize)
 
         for i in range(solver.popsize):
-            fitness_list[i] = _reward_function_individual(np.array(solutions[i]), target)
+            fitness_list[i] = _reward_function_individual(np.array(solutions[i]), target, n_symbols, n_updates)
             
         solver.tell(fitness_list)
         result = solver.result()
@@ -74,16 +67,19 @@ if __name__ == '__main__':
     
     X,Y = target.shape
     
-    N_PRODUCTION_RULES = 10
+    N_PRODUCTION_RULES = 5
+    N_SYMBOLS = 5
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
-    POP_SIZE = 100
-    N_GENERATIONS = 500
+    POP_SIZE = 20
+    N_GENERATIONS = 100
+    N_UPDATES = 10
 
     folder_path = f'PR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}'
-    
     os.makedirs(folder_path, exist_ok=True)    
 
     best_individual = evolve(target=target, 
+                             n_symbols=N_SYMBOLS,
+                             n_updates = N_UPDATES,
                              num_params=N_PARAMETERS,
                              popsize=POP_SIZE,
                              n_generations=N_GENERATIONS,
@@ -96,7 +92,7 @@ if __name__ == '__main__':
     #save model b
 
 
-    b = LS(X, Y, production_rules=rules)
+    b = LS(n=X, m=Y, n_symbols=N_SYMBOLS, production_rules=rules)
     #save model b in a pickle file
     with open(f'{folder_path}/model.pkl', 'wb') as f:
         pickle.dump(b, f)
@@ -109,7 +105,7 @@ if __name__ == '__main__':
 
     data = b.data
     print(data[-1])
-    Visuals.create_visualization_grid(data, filename=f'{folder_path}/Test', duration=100, gif=True, video=False)
+    Visuals.create_visualization_grid(data, filename=f'{folder_path}/animation', duration=100, gif=True, video=False)
     Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
     Visuals.visualize_evolution_results(result_path=f'{folder_path}/results.json', filename=f'{folder_path}/Best_rewards.png')
 

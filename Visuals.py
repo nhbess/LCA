@@ -16,6 +16,10 @@ def create_visualization_grid(data: np.array,
     if not gif and not video:
         raise ValueError('At least one of gif or video must be True')
     
+    #find bigest value in all the data
+    max_val = np.max([np.max(d) for d in data])
+    min_val = np.min([np.min(d) for d in data])
+    
     sizes = np.shape(data[0])
     fig = plt.figure()
     fig.set_size_inches(1. * sizes[0] / sizes[1], 1, forward=False)
@@ -30,7 +34,7 @@ def create_visualization_grid(data: np.array,
 
         ax.axis('off')
         fig.add_axes(ax)
-        ax.imshow(data[frame], cmap='Greys_r', norm=plt.Normalize(0, 1))
+        ax.imshow(data[frame], cmap='Greys_r', norm=plt.Normalize(min_val, max_val))
         
     # Creating the animation object
     ani = plt.matplotlib.animation.FuncAnimation(
