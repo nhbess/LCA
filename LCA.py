@@ -67,11 +67,11 @@ if __name__ == '__main__':
     
     X,Y = target.shape
     
-    N_PRODUCTION_RULES = 5
-    N_SYMBOLS = 5
+    N_PRODUCTION_RULES = 10
+    N_SYMBOLS = 3
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
-    POP_SIZE = 20
-    N_GENERATIONS = 100
+    POP_SIZE = 250
+    N_GENERATIONS = 1000
     N_UPDATES = 10
 
     folder_path = f'PR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}'
