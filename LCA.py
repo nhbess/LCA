@@ -67,8 +67,8 @@ if __name__ == '__main__':
     
     X,Y = target.shape
     
-    N_PRODUCTION_RULES = 10
-    N_SYMBOLS = 3
+    N_PRODUCTION_RULES = 5
+    N_SYMBOLS = 5
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
     POP_SIZE = 250
     N_GENERATIONS = 1000
