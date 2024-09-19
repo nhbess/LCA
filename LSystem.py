@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import animation
 from PIL import Image
 from scipy.ndimage import convolve
-from tqdm import tqdm
+#from tqdm import tqdm
 import Visuals
 np.set_printoptions(precision=2, suppress=True)
 

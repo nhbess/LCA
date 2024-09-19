@@ -5,7 +5,7 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FFMpegWriter, PillowWriter
-from tqdm import tqdm
+#from tqdm import tqdm
 
 def create_visualization_grid(data: np.array, 
                               filename: str = 'animation', 
@@ -30,7 +30,7 @@ def create_visualization_grid(data: np.array,
 
         ax.axis('off')
         fig.add_axes(ax)
-        ax.imshow(data[frame], cmap='Greys', norm=plt.Normalize(0, 1))
+        ax.imshow(data[frame], cmap='Greys_r', norm=plt.Normalize(0, 1))
         
     # Creating the animation object
     ani = plt.matplotlib.animation.FuncAnimation(

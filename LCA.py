@@ -2,7 +2,6 @@ import os
 import json
 import sys
 import numpy as np
-from tqdm import tqdm
 from Evolution import es
 import Visuals
 from LSystem import LS
@@ -37,7 +36,7 @@ def _reward_function_individual(individual:np.array, target:np.array):
     reward = 1 / (1 + loss)
     return reward
 
-def evolve(target:np.array, num_params:int, n_generations=100, popsize=20):
+def evolve(target:np.array, num_params:int, n_generations=100, popsize=20, folder:str = 'test'):
     
     solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
     
@@ -60,7 +59,7 @@ def evolve(target:np.array, num_params:int, n_generations=100, popsize=20):
         results['REWARDS'].append(fitness_list.tolist())
 
         this_dir = os.path.dirname(os.path.abspath(__file__))        
-        file_path = os.path.join(this_dir, '_MEDIA_LCA/results.json')
+        file_path = os.path.join(this_dir, f'{folder}/results.json')
     
     with open(file_path, 'w') as f:
         json.dump(results, f)
@@ -72,32 +71,34 @@ if __name__ == '__main__':
     np.random.seed(seed)
     
     target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=True, sensibility=0.1)
-    #resize image to 8x8
-    #target = np.zeros((5,5))
-    #target[4,:] = 1
-    #target[:,4] = 1
-    #target = target[:int(target.shape[0]/2), :int(target.shape[1]/2)]
+    
     X,Y = target.shape
-    N_PRODUCTION_RULES = 15
-
-    print(f'target.size {target.size}')
     
+    N_PRODUCTION_RULES = 10
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
+    POP_SIZE = 100
+    N_GENERATIONS = 500
+
+    folder_path = f'PR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}'
     
+    os.makedirs(folder_path, exist_ok=True)    
+
     best_individual = evolve(target=target, 
                              num_params=N_PARAMETERS,
-                             popsize=2,
-                             n_generations=2)
+                             popsize=POP_SIZE,
+                             n_generations=N_GENERATIONS,
+                             folder=folder_path)
     
+
     rules = np.copy(best_individual)
-    np.savetxt('_MEDIA_LCA/rules.txt', rules.flatten())
+    np.savetxt(f'{folder_path}/rules.txt', rules.flatten())
     rules = rules.reshape(-1, 2, 3, 3) # [N_PRODUCTION_RULES, reactant and products, 3, 3]
     #save model b
 
 
     b = LS(X, Y, production_rules=rules)
     #save model b in a pickle file
-    with open('_MEDIA_LCA/model.pkl', 'wb') as f:
+    with open(f'{folder_path}/model.pkl', 'wb') as f:
         pickle.dump(b, f)
 
     print(f'P: {b.P}')
@@ -108,7 +109,7 @@ if __name__ == '__main__':
 
     data = b.data
     print(data[-1])
-    Visuals.create_visualization_grid(data, filename=f'_MEDIA_LCA/Test', duration=100, gif=True, video=False)
-    Visuals.visualize_target_result(target, data, filename='_MEDIA_LCA/Result.png')
-    Visuals.visualize_evolution_results(result_path='Evolution/results.json', filename='_MEDIA_LCA/Best_rewards.png')
+    Visuals.create_visualization_grid(data, filename=f'{folder_path}/Test', duration=100, gif=True, video=False)
+    Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
+    Visuals.visualize_evolution_results(result_path=f'{folder_path}/results.json', filename=f'{folder_path}/Best_rewards.png')
 
