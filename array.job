@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#SBATCH --job-name=array            # Job name
+#SBATCH --output=job.%j.out         # Name of output file (%A is the job ID, %a is the array index)
+#SBATCH --cpus-per-task=1         # Schedule one core
+#SBATCH --time=10:00:00           # Run time (hh:mm:ss) - run for 10 hours max
+#SBATCH --partition=red           # Run on either the Red or Brown queue
+#SBATCH --array=0-9                # Create an array job with 10 tasks (0 to 9)
+
+VAR_FILE="inputs.txt"           # Define the variable file
+
+# Read the specific line corresponding to the array task ID
+INPUTS=$(sed -n "${SLURM_ARRAY_TASK_ID}p" "$VAR_FILE")
+
+# Run the Python script with the parameters read from the file
+python3 LCA.py $INPUTS

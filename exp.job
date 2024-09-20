@@ -1,21 +1,17 @@
 #!/bin/bash
-#SBATCH --job-name=job        # Job name
-#SBATCH --output=job.%j.out   # Name of output file (%j expands to jobId)
-#SBATCH --cpus-per-task=1     # Schedule one core
-#SBATCH --time=10:00:00       # Run time (hh:mm:ss) - run for 10 hour max
-#SBATCH --partition=red       # Run on either the Red or Brown queue
+#SBATCH --job-name=job            # Job name
+#SBATCH --output=job.%A_%a.out     # Name of output file (%A is the job ID, %a is the array index)
+#SBATCH --cpus-per-task=1         # Schedule one core
+#SBATCH --time=10:00:00           # Run time (hh:mm:ss) - run for 10 hours max
+#SBATCH --partition=red           # Run on either the Red or Brown queue
+#SBATCH --array=0-9                # Create an array job with 10 tasks (0 to 9)
 
-# Run each command in the background
-python3 LCA.py --n_symbols 5 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules  5 --pop_size 200 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules  8 --pop_size 200 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 10 --pop_size 200 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 15 --pop_size 200 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25 &
-python3 LCA.py --n_symbols 5 --n_production_rules 20 --pop_size 200 --n_generations 500 --n_updates 25 &
+# Define the parameters for each job in an array
+declare -a n_production_rules=(5 5 8 8 10 10 15 15 20 20)
+declare -a pop_size=(100 200 100 200 100 200 100 200 100 200)
 
-# Wait for all background jobs to finish
-wait
+# Get the current job's index from the SLURM_ARRAY_TASK_ID
+index=$SLURM_ARRAY_TASK_ID
+
+# Run the Python script with the corresponding parameters
+python3 LCA.py --n_symbols 5 --n_production_rules ${n_production_rules[$index]} --pop_size ${pop_size[$index]} --n_generations 500 --n_updates 25
