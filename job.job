@@ -5,4 +5,15 @@
 #SBATCH --time=10:00:00          # Run time (hh:mm:ss) - run for 10 hour max
 #SBATCH --partition=red    # Run on either the Red or Brown queue
 # Print out the hostname of the node the job is running on
-python3 LCA.py
+#python3 LCA.py
+
+python3 LCA.py --n_symbols 5 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules  5 --pop_size 200 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules  8 --pop_size 200 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 10 --pop_size 200 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 15 --pop_size 200 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25
+python3 LCA.py --n_symbols 5 --n_production_rules 20 --pop_size 200 --n_generations 500 --n_updates 25

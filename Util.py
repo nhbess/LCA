@@ -12,3 +12,12 @@ def load_image_as_numpy_array(image_path, normalize=True, black_and_white=False,
     if binary:
         image_array = np.where(image_array > sensibility, 1, 0)
     return image_array
+
+def discretize_target(target:np.array, n_symbols:int) -> np.array:
+    target = target/np.max(target)
+    symbols = np.arange(n_symbols)
+    target = np.abs(target)
+    mapped = np.floor(np.abs(target) * len(symbols)).astype(int)
+    mapped[mapped == len(symbols)] = len(symbols) - 1  # To handle the edge case when array value is exactly 1
+    mapped = (mapped).astype(int)
+    return mapped
