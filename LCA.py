@@ -7,23 +7,20 @@ import Visuals
 from LSystem import LS
 import Util
 import pickle
+import argparse
 
 np.set_printoptions(precision=2, suppress=True)
 
 
 
 def _reward_function_individual(individual:np.array, target:np.array, n_symbols:int, n_updates:int) -> float: 
-    #print(target)
-    #print(individual)
-
-    # Create LSystem with individual production rules
+    
     X,Y = target.shape
     rules = np.copy(individual)
-    rules = rules.reshape(-1, 2, 3, 3) # [N_PRODUCTION_RULES, reactant and products, 3, 3]
-
     b = LS(n=X, m=Y, n_symbols=n_symbols, production_rules=rules)
-    for i in range(n_updates):
-            b.update()
+
+    for _ in range(n_updates):
+        b.update()
     
     result = b.data
     loss = np.sum(np.square(target - result[-1]))
@@ -32,7 +29,7 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.0, sigma_init=0.5)
     results = {'BEST': [],'REWARDS': []}
     
     for g in range(n_generations):
@@ -62,20 +59,36 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
 if __name__ == '__main__':
     seed = np.random.randint(0, 100000000)
     np.random.seed(seed)
-    
-    target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=True, sensibility=0.1)
+
+    # Setup argument parser
+    parser = argparse.ArgumentParser(description='Process some integers.')
+
+    # Define the parameters with default values
+    parser.add_argument('--n_symbols',          type=int, default=5,    help='Number of symbols')
+    parser.add_argument('--n_production_rules', type=int, default=10,   help='Number of production rules')
+    parser.add_argument('--pop_size',           type=int, default=10,   help='Population size')
+    parser.add_argument('--n_generations',      type=int, default=50,   help='Number of generations')
+    parser.add_argument('--n_updates',          type=int, default=20,   help='Number of updates')
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Assign the parsed values to variables
+    N_SYMBOLS = args.n_symbols
+    N_PRODUCTION_RULES = args.n_production_rules
+    POP_SIZE = args.pop_size
+    N_GENERATIONS = args.n_generations
+    N_UPDATES = args.n_updates
+
+    target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
+    target = Util.discretize_target(target, N_SYMBOLS)
     
     X,Y = target.shape
-    
-    N_PRODUCTION_RULES = 10
-    N_SYMBOLS = 3
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
-    POP_SIZE = 10
-    N_GENERATIONS = 50
-    N_UPDATES = 15
 
-    folder_path = f'PR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}'
-    os.makedirs(folder_path, exist_ok=True)    
+
+    folder_path =f'NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
+    os.makedirs(folder_path, exist_ok=True)
 
     best_individual = evolve(target=target, 
                              n_symbols=N_SYMBOLS,
@@ -101,7 +114,6 @@ if __name__ == '__main__':
     
     for i in range(X):
         b.update()
-
 
     data = b.data
     print(data[-1])
