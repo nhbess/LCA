@@ -23,13 +23,14 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
         b.update()
     
     result = b.data
-    loss = np.sum(np.square(target - result[-1]))
+    #loss = np.sum(np.square(target - result[-1])) # L2 loss
+    loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
     reward = 1 / (1 + loss)
     return reward
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.0, sigma_init=0.5)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.0, sigma_init=0.35)
     results = {'BEST': [],'REWARDS': []}
     
     for g in range(n_generations):
