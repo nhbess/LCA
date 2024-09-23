@@ -23,7 +23,8 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
         b.update()
     
     result = b.data
-    loss = np.sum(np.square(target - result[-1]))
+    #loss = np.sum(np.square(target - result[-1])) # L2 loss
+    loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
     reward = 1 / (1 + loss)
     return reward
 
