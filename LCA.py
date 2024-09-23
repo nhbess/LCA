@@ -29,7 +29,7 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.0, sigma_init=0.5)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.25)
     results = {'BEST': [],'REWARDS': []}
     
     for g in range(n_generations):
