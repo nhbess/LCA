@@ -10,9 +10,6 @@ import pickle
 import argparse
 
 np.set_printoptions(precision=2, suppress=True)
-
-
-
 def _reward_function_individual(individual:np.array, target:np.array, n_symbols:int, n_updates:int) -> float: 
     
     X,Y = target.shape
