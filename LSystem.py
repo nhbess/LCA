@@ -15,7 +15,7 @@ class LS:
     def __init__(self, n:int, m:int, n_symbols:int, n_production_rules:int = 2, production_rules = None) -> None:
         self.symbols = np.arange(n_symbols)
         
-        if production_rules is not None:    self.P = self._map_to_symbols(production_rules).reshape(-1, 2, 3, 3)
+        if production_rules is not None:    self.P = self._map_to_symbols(production_rules, abs=True).reshape(-1, 2, 3, 3)
         else:                               self.P = self._make_production_rules(n_production_rules)
         
         self.P[0] = [np.array([[0, 0, 0], 
@@ -33,7 +33,7 @@ class LS:
         sign = np.sign(array)
         mapped = np.floor(np.abs(array) * len(self.symbols)).astype(int)
         mapped[mapped == len(self.symbols)] = len(self.symbols) - 1
-        mapped = (mapped * sign).astype(int)
+        mapped = (mapped * sign).astype(int)        
         return mapped
     
     def _make_production_rules(self, n_production_rules) -> dict:
@@ -72,7 +72,13 @@ class LS:
                 N = N + self._replace_pattern(np.zeros_like(S), product, matches)
         
         self.B = self.B + N
-        self.B = np.clip(self.B, -(len(self.symbols)-1), len(self.symbols)-1)
+        
+        ALLOW_NEGATIVE = False
+        if ALLOW_NEGATIVE:
+            self.B = np.clip(self.B, -(len(self.symbols)-1), len(self.symbols)-1)
+        else:
+            self.B = np.clip(self.B, 0, len(self.symbols)-1)
+        
         self.data.append(self.B.copy())
 
 if __name__ == '__main__':
@@ -91,6 +97,6 @@ if __name__ == '__main__':
         b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=N_PRODUCTION_RULES)
         for i in range(Y*2):
             b.update()
-            print(b.B)
+            #print(b.B)
         data = b.data
         Visuals.create_visualization_grid(data, filename=f'Test', duration=100, gif=True, video=False)

@@ -22,12 +22,12 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
     result = b.data
     #loss = np.sum(np.square(target - result[-1])) # L2 loss
     loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
-    reward = 1 / (1 + loss)
+    reward = -loss
     return reward
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.25)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.00, sigma_init=0.9)
     results = {'BEST': [],'REWARDS': []}
     
     for g in range(n_generations):
@@ -62,10 +62,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
 
     # Define the parameters with default values
-    parser.add_argument('--n_symbols',          type=int, default=5,    help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=10,   help='Number of production rules')
+    parser.add_argument('--n_symbols',          type=int, default=2,    help='Number of symbols')
+    parser.add_argument('--n_production_rules', type=int, default=20,   help='Number of production rules')
     parser.add_argument('--pop_size',           type=int, default=10,   help='Population size')
-    parser.add_argument('--n_generations',      type=int, default=50,   help='Number of generations')
+    parser.add_argument('--n_generations',      type=int, default=20,   help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=20,   help='Number of updates')
 
     # Parse the arguments
@@ -86,6 +86,7 @@ if __name__ == '__main__':
 
 
     folder_path =f'EXP/NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
+    folder_path =f'EXP/Test' 
     os.makedirs(folder_path, exist_ok=True)
 
     best_individual = evolve(target=target, 
@@ -100,11 +101,9 @@ if __name__ == '__main__':
     rules = np.copy(best_individual)
     np.savetxt(f'{folder_path}/rules.txt', rules.flatten())
     rules = rules.reshape(-1, 2, 3, 3) # [N_PRODUCTION_RULES, reactant and products, 3, 3]
-    #save model b
 
 
     b = LS(n=X, m=Y, n_symbols=N_SYMBOLS, production_rules=rules)
-    #save model b in a pickle file
     with open(f'{folder_path}/model.pkl', 'wb') as f:
         pickle.dump(b, f)
 
