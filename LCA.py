@@ -85,7 +85,7 @@ if __name__ == '__main__':
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
 
 
-    folder_path =f'EXP/NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
+    folder_path =f'EXP/new_NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
     os.makedirs(folder_path, exist_ok=True)
 
     best_individual = evolve(target=target, 
