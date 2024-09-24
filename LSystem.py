@@ -15,7 +15,7 @@ class LS:
     def __init__(self, n:int, m:int, n_symbols:int, n_production_rules:int = 2, production_rules = None) -> None:
         self.symbols = np.arange(n_symbols)
         
-        if production_rules is not None:    self.P = self._map_to_symbols(production_rules, abs=True).reshape(-1, 2, 3, 3)
+        if production_rules is not None:    self.P = self._map_to_symbols(production_rules).reshape(-1, 2, 3, 3)
         else:                               self.P = self._make_production_rules(n_production_rules)
             
         self.P[0] = [np.array([[0, 0, 0], 
@@ -25,8 +25,7 @@ class LS:
         
         for p in self.P:
             p[0] = abs(p[0])
-        #    print(p)
-
+        
         self.B = np.zeros((n,m), dtype=int)
         self.B[n//2, m//2] = 1
         self.data = []
@@ -96,9 +95,12 @@ if __name__ == '__main__':
     RUNS = X
     N_PRODUCTION_RULES = 20
     N_SYMBOLS = 2
+    N_PARAMETERS =  N_PRODUCTION_RULES * 2 * 3 * 3
 
+    P = np.random.rand(N_PARAMETERS)*2 - 1
+    print(P)
     for run in range(1):
-        b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=N_PRODUCTION_RULES)
+        b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=None, production_rules=P)
         for i in range(Y*2):
             b.update()
             #print(b.B)
