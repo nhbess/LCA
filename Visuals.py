@@ -5,6 +5,8 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FFMpegWriter, PillowWriter
+import warnings
+warnings.filterwarnings("ignore")
 #from tqdm import tqdm
 
 def create_visualization_grid(data: np.array, 
@@ -30,7 +32,7 @@ def create_visualization_grid(data: np.array,
         ax.clear()
         plt.rcParams["figure.figsize"] = [7.00, 3.50]
         plt.rcParams["figure.autolayout"] = True        
-        ax.set_axis_off()
+        #ax.set_axis_off()
 
         ax.axis('off')
         fig.add_axes(ax)

@@ -64,8 +64,8 @@ if __name__ == '__main__':
     # Define the parameters with default values
     parser.add_argument('--n_symbols',          type=int, default=2,    help='Number of symbols')
     parser.add_argument('--n_production_rules', type=int, default=20,   help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default=10,   help='Population size')
-    parser.add_argument('--n_generations',      type=int, default=20,   help='Number of generations')
+    parser.add_argument('--pop_size',           type=int, default= 2,   help='Population size')
+    parser.add_argument('--n_generations',      type=int, default= 2,   help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=20,   help='Number of updates')
 
     # Parse the arguments
@@ -86,7 +86,6 @@ if __name__ == '__main__':
 
 
     folder_path =f'EXP/NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
-    folder_path =f'EXP/Test' 
     os.makedirs(folder_path, exist_ok=True)
 
     best_individual = evolve(target=target, 

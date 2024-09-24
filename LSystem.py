@@ -17,11 +17,15 @@ class LS:
         
         if production_rules is not None:    self.P = self._map_to_symbols(production_rules, abs=True).reshape(-1, 2, 3, 3)
         else:                               self.P = self._make_production_rules(n_production_rules)
-        
+            
         self.P[0] = [np.array([[0, 0, 0], 
                                [0, 1, 0], 
                                [0, 0, 0]]), 
                                 self.P[0][1]]   #First rule to match the seed
+        
+        for p in self.P:
+            p[0] = abs(p[0])
+        #    print(p)
 
         self.B = np.zeros((n,m), dtype=int)
         self.B[n//2, m//2] = 1
