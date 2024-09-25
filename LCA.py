@@ -86,13 +86,13 @@ if __name__ == '__main__':
     N_UPDATES = args.n_updates
     RUN_ID = args.run_id
 
-    #target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
-    #target = Util.discretize_target(target, N_SYMBOLS)
+    target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
+    target = Util.discretize_target(target, N_SYMBOLS)
     
-    target = np.zeros((7,7))
-    #make a cross
-    target[:, target.shape[0]//2] = 1
-    target[target.shape[1]//2, :] = 1
+    #target = np.zeros((7,7))
+    ##make a cross
+    #target[:, target.shape[0]//2] = 1
+    #target[target.shape[1]//2, :] = 1
     print(target)
 
     X,Y = target.shape
