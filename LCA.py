@@ -96,15 +96,19 @@ if __name__ == '__main__':
     X,Y = target.shape
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
 
-    folder_path =f'EXP/Run_0'
-    i = 0
-    while os.path.exists(folder_path):
-        folder_path =f'EXP/Run_{i}' 
-        i += 1
-    os.makedirs(folder_path, exist_ok=True)
+
+
+
+    # SET FOLDERS
+    base_folder = 'EXP'
+    os.makedirs(base_folder, exist_ok=True)
+    existing_runs = [int(d[4:]) for d in os.listdir(base_folder) if d.startswith('Run_') and d[4:].isdigit()]
+    next_id = max(existing_runs, default=0) + 1
+    folder_path = os.path.join(base_folder, f'Run_{next_id}')
+    os.makedirs(folder_path)
+
 
     starting_time = time.time()
-
     best_individual = evolve(target=target, 
                              n_symbols=N_SYMBOLS,
                              n_updates = N_UPDATES,
