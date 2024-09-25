@@ -8,6 +8,7 @@ from LSystem import LS
 import Util
 import pickle
 import argparse
+import time
 
 np.set_printoptions(precision=2, suppress=True)
 def _reward_function_individual(individual:np.array, target:np.array, n_symbols:int, n_updates:int) -> float: 
@@ -20,15 +21,20 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
         b.update()
     
     result = b.data
-    #loss = np.sum(np.square(target - result[-1])) # L2 loss
-    loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
+    #only ones in results
+    #result = np.array([np.where(r == 1, 1, 0) for r in result])
+
+    loss = np.mean(np.square(target - result[-1])) # L2 loss
+    #loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
     reward = -loss
     return reward
 
+
+
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.00, sigma_init=0.9)
-    results = {'BEST': [],'REWARDS': []}
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
+    results = {'REWARDS': []}
     
     for g in range(n_generations):
         solutions = solver.ask()
@@ -43,11 +49,11 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
         best_params, best_reward, curr_reward, sigma = result[0], result[1], result[2], result[3]
         print(f'G:{g}, BEST PARAMS, BEST REWARD: {best_reward}, CURRENT REWARD: {curr_reward}')
         
-        results['BEST'].append(best_params.tolist())
+        #results['BEST'].append(best_params.tolist())
         results['REWARDS'].append(fitness_list.tolist())
 
         this_dir = os.path.dirname(os.path.abspath(__file__))        
-        file_path = os.path.join(this_dir, f'{folder}/results.json')
+        file_path = os.path.join(this_dir, f'{folder}/evolution_rewards.json')
     
     with open(file_path, 'w') as f:
         json.dump(results, f)
@@ -62,11 +68,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
 
     # Define the parameters with default values
-    parser.add_argument('--n_symbols',          type=int, default=2,    help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=20,   help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default= 2,   help='Population size')
-    parser.add_argument('--n_generations',      type=int, default= 2,   help='Number of generations')
-    parser.add_argument('--n_updates',          type=int, default=20,   help='Number of updates')
+    parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
+    parser.add_argument('--n_production_rules', type=int, default=10,       help='Number of production rules')
+    parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
+    parser.add_argument('--n_generations',      type=int, default= 20,      help='Number of generations')
+    parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
 
     # Parse the arguments
     args = parser.parse_args()
@@ -78,15 +84,26 @@ if __name__ == '__main__':
     N_GENERATIONS = args.n_generations
     N_UPDATES = args.n_updates
 
-    target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
-    target = Util.discretize_target(target, N_SYMBOLS)
+    #target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
+    #target = Util.discretize_target(target, N_SYMBOLS)
     
+    target = np.zeros((7,7))
+    #make a cross
+    target[:, target.shape[0]//2] = 1
+    target[target.shape[1]//2, :] = 1
+    print(target)
+
     X,Y = target.shape
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
 
-
-    folder_path =f'EXP/new_NSY{N_SYMBOLS}NPR{N_PRODUCTION_RULES}POP{POP_SIZE}GEN{N_GENERATIONS}NUP{N_UPDATES}' 
+    folder_path =f'EXP/Run_0'
+    i = 0
+    while os.path.exists(folder_path):
+        folder_path =f'EXP/Run_{i}' 
+        i += 1
     os.makedirs(folder_path, exist_ok=True)
+
+    starting_time = time.time()
 
     best_individual = evolve(target=target, 
                              n_symbols=N_SYMBOLS,
@@ -96,7 +113,20 @@ if __name__ == '__main__':
                              n_generations=N_GENERATIONS,
                              folder=folder_path)
     
+    end_time = time.time()
 
+    experiment_details = {
+        'N_SYMBOLS': N_SYMBOLS,
+        'N_PRODUCTION_RULES': N_PRODUCTION_RULES,
+        'POP_SIZE': POP_SIZE,
+        'N_GENERATIONS': N_GENERATIONS,
+        'N_UPDATES': N_UPDATES,
+        'SEED': seed,
+        'TIME': (end_time - starting_time) / 3600
+    }
+    
+    with open(f'{folder_path}/experiment_details.json', 'w') as f:
+        json.dump(experiment_details, f)
     rules = np.copy(best_individual)
     np.savetxt(f'{folder_path}/rules.txt', rules.flatten())
     rules = rules.reshape(-1, 2, 3, 3) # [N_PRODUCTION_RULES, reactant and products, 3, 3]
@@ -108,12 +138,12 @@ if __name__ == '__main__':
 
     print(f'P: {b.P}')
     
-    for i in range(X):
+    for i in range(N_UPDATES):
         b.update()
 
     data = b.data
     print(data[-1])
     Visuals.create_visualization_grid(data, filename=f'{folder_path}/animation', duration=100, gif=True, video=False)
     Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
-    Visuals.visualize_evolution_results(result_path=f'{folder_path}/results.json', filename=f'{folder_path}/Best_rewards.png')
+    Visuals.visualize_evolution_results(result_path=f'{folder_path}/evolution_rewards.json', filename=f'{folder_path}/Best_rewards.png')
 
