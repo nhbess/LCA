@@ -73,6 +73,7 @@ if __name__ == '__main__':
     parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
     parser.add_argument('--n_generations',      type=int, default= 20,      help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
+    parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
 
     # Parse the arguments
     args = parser.parse_args()
@@ -83,6 +84,7 @@ if __name__ == '__main__':
     POP_SIZE = args.pop_size
     N_GENERATIONS = args.n_generations
     N_UPDATES = args.n_updates
+    RUN_ID = args.run_id
 
     #target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
     #target = Util.discretize_target(target, N_SYMBOLS)
@@ -102,10 +104,8 @@ if __name__ == '__main__':
     # SET FOLDERS
     base_folder = 'EXP'
     os.makedirs(base_folder, exist_ok=True)
-    existing_runs = [int(d[4:]) for d in os.listdir(base_folder) if d.startswith('Run_') and d[4:].isdigit()]
-    next_id = max(existing_runs, default=0) + 1
-    folder_path = os.path.join(base_folder, f'Run_{next_id}')
-    os.makedirs(folder_path)
+    folder_path = os.path.join(base_folder, f'Run_{RUN_ID}')
+    os.makedirs(folder_path, exist_ok=True)
 
 
     starting_time = time.time()

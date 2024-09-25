@@ -1,10 +1,10 @@
---n_symbols 2 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25
---n_symbols 2 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25
+--n_symbols 2 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 0 
+--n_symbols 2 --n_production_rules  5 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 1
+--n_symbols 2 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 2
+--n_symbols 2 --n_production_rules  8 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 3
+--n_symbols 2 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 4
+--n_symbols 2 --n_production_rules 10 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 5
+--n_symbols 2 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 6
+--n_symbols 2 --n_production_rules 15 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 7
+--n_symbols 2 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 8
+--n_symbols 2 --n_production_rules 20 --pop_size 100 --n_generations 500 --n_updates 25 --run_id 9
