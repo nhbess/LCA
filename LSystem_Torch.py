@@ -1,44 +1,53 @@
-import sys
 import torch
-import matplotlib.pyplot as plt
-import numpy as np
-
-import Visuals
-np.set_printoptions(precision=2, suppress=True)
 
 class LS:
-    def __init__(self, n:int, m:int, n_symbols:int, production_rules = torch.Tensor) -> None:
-
-        self.symbols = np.arange(n_symbols)
-        self.P = self._convert_to_production_rules(production_rules)
+    def __init__(self, n: int, m: int, n_symbols: int, n_production_rules: int = 2, production_rules=None, device='cpu') -> None:
+        self.symbols = torch.arange(n_symbols, device=device)
         
-        self.B = torch.zeros((n, m))  # Use torch.zeros instead of np.zeros
-        self.B[n // 2, m // 2] = 1  # This line remains the same
+        if production_rules is not None:
+            self.P = self._map_to_symbols(production_rules).view(-1, 2, 3, 3)
+        else:
+            self.P = self._make_production_rules(n_production_rules)
+        
+        # Ensure the first rule is set manually
+        self.P[0] = torch.stack([torch.tensor([[0, 0, 0], 
+                                               [0, 1, 0], 
+                                               [0, 0, 0]], dtype=torch.float32, device=device), 
+                                 self.P[0][1]]) #First rule to match the seed
+        
+        # Ensure reactants are positive
+        self.P[:, 0] = torch.abs(self.P[:, 0])
+
+        self.B = torch.zeros((n, m), dtype=torch.float32, device=device)
+        self.B[n // 2, m // 2] = 1
         self.data = []
-    
-    def _convert_to_production_rules(self, array, abs=False) -> torch.Tensor:
+
+    def _map_to_symbols(self, array, abs=False):
         array = torch.clamp(array, -1, 1)
         if abs:
             array = torch.abs(array)
-        sign = torch.sign(array)  # Use torch.sign
-        P = torch.floor(torch.abs(array) * len(self.symbols)).to(torch.int)  # Use torch.floor and convert to int
-        P[P == len(self.symbols)] = len(self.symbols) - 1  # No change needed
-        P = (P * sign).to(torch.int)  # Use .to(torch.int) instead of .astype(int)
-        P = P.reshape(-1, 2, 3, 3)
-        P[:, 0] = torch.abs(P[:, 0])
-        P[0, 0] = torch.tensor([[0, 0, 0],[0, 1, 0],[0, 0, 0]])
+        sign = torch.sign(array)
+        mapped = torch.floor(torch.abs(array) * len(self.symbols)).long()
+        mapped[mapped == len(self.symbols)] = len(self.symbols) - 1
+        mapped = (mapped * sign).long()
+        return mapped
 
+    def _make_production_rules(self, n_production_rules) -> torch.Tensor:
+        n_parameters = n_production_rules * 2 * 3 * 3  # reactants and products
+        production_rules = torch.rand(n_parameters, device=self.symbols.device) * 2 - 1  # Random values between -1 and 1
+        production_rules[0] = 1.0  # Set a specific value for the first rule
+        P = self._map_to_symbols(production_rules).view(-1, 2, 3, 3)
         return P
-    
-    def _find_matches(self, S:np.array, reactant:np.array) -> list:
+
+    def _find_matches(self, S: torch.Tensor, reactant: torch.Tensor) -> list:
         M_rows, M_cols = S.shape
         m_rows, m_cols = reactant.shape
-
         matches = []
         for i in range(M_rows - m_rows + 1):
             for j in range(M_cols - m_cols + 1):
-                subgrid = S[i:i+m_rows, j:j+m_cols]        
-                if np.array_equal(subgrid, reactant):
+                subgrid = S[i:i+m_rows, j:j+m_cols]
+                # Use an approximate equality check to keep gradients
+                if torch.allclose(subgrid, reactant):
                     matches.append((i, j))
         return matches
 
@@ -46,46 +55,25 @@ class LS:
         m_rows, m_cols = m.shape
         for match in matches:
             i, j = match
-            M[i:i+m_rows, j:j+m_cols] = m        
+            M[i:i+m_rows, j:j+m_cols] = m
         return M
 
     def update(self) -> None:
-        S = self.B
-        N = np.zeros_like(S)
+        S = self.B.clone()  # Use torch.clone() instead of np.copy()
+        N = torch.zeros_like(S)
         for rule in self.P:
             reactant, product = rule
             matches = self._find_matches(S, reactant)
             if len(matches) > 0:
-                N = N + self._replace_pattern(np.zeros_like(S), product, matches)
+                N = N + self._replace_pattern(torch.zeros_like(S), product, matches)
         
         self.B = self.B + N
         
-        self.B = np.clip(self.B, 0, len(self.symbols)-1)
+        # Adjust clipping for symbols in torch
+        ALLOW_NEGATIVE = False
+        if ALLOW_NEGATIVE:
+            self.B = torch.clamp(self.B, -(len(self.symbols)-1), len(self.symbols)-1)
+        else:
+            self.B = torch.clamp(self.B, 0, len(self.symbols)-1)
         
-        self.data.append(self.B)
-
-if __name__ == '__main__':
-    pass
-    seed = np.random.randint(0, 100000000) 
-    #seed = 25576077 
-    np.random.seed(seed)
-    print(f'Seed: {seed}')
-    Y = 10
-    X = Y   #int(Y/ratio)
-    RUNS = 50
-    N_PRODUCTION_RULES = 3
-    N_SYMBOLS = 2
-    N_PARAMETERS =  N_PRODUCTION_RULES * 2 * 3 * 3
-
-    P = torch.tensor(np.random.rand(N_PARAMETERS)*2 - 1, requires_grad=True)
-
-    for run in range(1):
-        b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, production_rules=P)
-        
-        for i in range(Y*2):
-            b.update()
-            #print(b.B)
-        data = b.data
-        #data to numpy array
-        data = np.array(data)
-        Visuals.create_visualization_grid(data, filename=f'Test', duration=100, gif=True, video=False)
+        self.data.append(self.B.clone())  # Save a copy of the board state
