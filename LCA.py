@@ -11,6 +11,7 @@ import argparse
 import time
 
 np.set_printoptions(precision=2, suppress=True)
+
 def _reward_function_individual(individual:np.array, target:np.array, n_symbols:int, n_updates:int) -> float: 
     
     X,Y = target.shape
@@ -45,7 +46,7 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
         result = solver.result()
         
         best_params, best_reward, curr_reward, sigma = result[0], result[1], result[2], result[3]
-        print(f'G:{g}, BEST PARAMS, BEST REWARD: {best_reward}, CURRENT REWARD: {curr_reward}')
+        #print(f'G:{g}, BEST PARAMS, BEST REWARD: {best_reward}, CURRENT REWARD: {curr_reward}')
         
         #results['BEST'].append(best_params.tolist())
         results['REWARDS'].append(fitness_list.tolist())
@@ -62,26 +63,9 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
 
 
 
-
-
-
-if __name__ == '__main__':
+def run(args):
     seed = np.random.randint(0, 100000000)
     np.random.seed(seed)
-
-    # Setup argument parser
-    parser = argparse.ArgumentParser(description='Process some integers.')
-
-    # Define the parameters with default values
-    parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=10,       help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
-    parser.add_argument('--n_generations',      type=int, default= 2,      help='Number of generations')
-    parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
-    parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
-
-    # Parse the arguments
-    args = parser.parse_args()
 
     # Assign the parsed values to variables
     N_SYMBOLS = args.n_symbols
@@ -92,12 +76,11 @@ if __name__ == '__main__':
     RUN_ID = args.run_id
 
 
-    base_folder = 'Love'
+    base_folder = 'Face2'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
-
 
     # SET FOLDERS
     os.makedirs(base_folder, exist_ok=True)
@@ -134,10 +117,8 @@ if __name__ == '__main__':
 
 
     b = LS(n=X, m=Y, n_symbols=N_SYMBOLS, production_rules=rules)
-    with open(f'{folder_path}/model.pkl', 'wb') as f:
-        pickle.dump(b, f)
-
-    print(f'P: {b.P}')
+    #with open(f'{folder_path}/model.pkl', 'wb') as f:
+    #    pickle.dump(b, f)
     
     for i in range(N_UPDATES):
         b.update()
@@ -149,3 +130,19 @@ if __name__ == '__main__':
     Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
     Visuals.visualize_evolution_results(result_path=f'{folder_path}/evolution_rewards.json', filename=f'{folder_path}/Best_rewards.png')
 
+
+if __name__ == '__main__':
+    # Setup argument parser
+    parser = argparse.ArgumentParser()
+
+    # Define the parameters with default values
+    parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
+    parser.add_argument('--n_production_rules', type=int, default=10,       help='Number of production rules')
+    parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
+    parser.add_argument('--n_generations',      type=int, default= 2,      help='Number of generations')
+    parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
+    parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
+
+    # Parse the arguments
+    args = parser.parse_args()
+    run(args)

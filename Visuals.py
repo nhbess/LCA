@@ -47,7 +47,6 @@ def create_visualization_grid(data: np.array,
     if gif:
         gif_path = f"{filename}.gif"
         ani.save(gif_path, writer=PillowWriter(fps=1000//duration))
-        print(f"GIF saved as {gif_path}")
     
     # Save as video if required
     if video:
@@ -61,19 +60,12 @@ def create_visualization_grid(data: np.array,
 def visualize_target_result(target, data, filename):
     # Ensure that target and data are 2D arrays (grayscale)
     if len(target.shape) > 2:
-        print(f"Target has more than 2 dimensions: {target.shape}, converting to grayscale")
         target = np.mean(target, axis=-1)
     
     result = data[-1]
     if len(result.shape) > 2:
-        print(f"Result has more than 2 dimensions: {result.shape}, converting to grayscale")
         result = np.mean(result, axis=-1)
 
-    # Debug print statements to check shapes and values
-    print(f"Target shape: {target.shape}, Result shape: {result.shape}")
-    print(f"Target min: {target.min()}, max: {target.max()}")
-    print(f"Result min: {result.min()}, max: {result.max()}")
-    
     fig, ax = plt.subplots(1, 2)
     ax[0].imshow(target, cmap='gray')
     ax[0].set_title('Target')
