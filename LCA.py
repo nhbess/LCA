@@ -29,8 +29,6 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
     reward = -loss
     return reward
 
-
-
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
     solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
@@ -87,7 +85,7 @@ if __name__ == '__main__':
     RUN_ID = args.run_id
 
 
-    base_folder = 'Face'
+    base_folder = 'Love'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
