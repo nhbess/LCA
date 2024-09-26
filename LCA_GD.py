@@ -23,7 +23,7 @@ def loss_function(params: torch.Tensor,
         result = torch.tensor(b.data, device=target.device, dtype=torch.float32)
     else:
         result = torch.tensor(b.data[-1], device=target.device, dtype=torch.float32)
-        result.requires_grad_(True)
+        result.requires_grad_(True) # Thi doesnt have sense, results is not a parameter to optimize FIX THIS
     
     loss = torch.sum((target - result) ** 2)  
     return loss
