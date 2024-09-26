@@ -58,14 +58,33 @@ def create_visualization_grid(data: np.array,
     plt.close(fig)
 
 
-def visualize_target_result(target, data, filename):            
-    fig, ax = plt.subplots(1,2)
+def visualize_target_result(target, data, filename):
+    # Ensure that target and data are 2D arrays (grayscale)
+    if len(target.shape) > 2:
+        print(f"Target has more than 2 dimensions: {target.shape}, converting to grayscale")
+        target = np.mean(target, axis=-1)
+    
+    result = data[-1]
+    if len(result.shape) > 2:
+        print(f"Result has more than 2 dimensions: {result.shape}, converting to grayscale")
+        result = np.mean(result, axis=-1)
+
+    # Debug print statements to check shapes and values
+    print(f"Target shape: {target.shape}, Result shape: {result.shape}")
+    print(f"Target min: {target.min()}, max: {target.max()}")
+    print(f"Result min: {result.min()}, max: {result.max()}")
+    
+    fig, ax = plt.subplots(1, 2)
     ax[0].imshow(target, cmap='gray')
     ax[0].set_title('Target')
-    ax[1].imshow(data[-1], cmap='gray')
+    ax[1].imshow(result, cmap='gray')
     ax[1].set_title('Result')
-    ax[0].axis('off')
-    ax[1].axis('off')
+    
+    ax[0].set_xticks([])
+    ax[0].set_yticks([])
+    ax[1].set_xticks([])
+    ax[1].set_yticks([])
+    
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
 
@@ -97,7 +116,3 @@ def plot_frame(data, filename, cmap='Blues'):
 
 if __name__ == '__main__':
     pass
-    #data = [np.random.randint(0, 2, (3, 3, 3)) for _ in range(50)]  # Example data
-    #create_visualization_pyvista(data, 'test_video', 100, 'Test Video', gif=False, video=True, rotate=True)
-    #data = [np.random.randint(0, 2, (3, 3)) for _ in range(10)]  # Example data
-    #create_visualization_grid(data, 'test_video', 100, gif=False, video=True)

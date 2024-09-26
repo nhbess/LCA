@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
     parser.add_argument('--n_production_rules', type=int, default=10,       help='Number of production rules')
     parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
-    parser.add_argument('--n_generations',      type=int, default= 20,      help='Number of generations')
+    parser.add_argument('--n_generations',      type=int, default= 2,      help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
     parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
 
@@ -86,23 +86,15 @@ if __name__ == '__main__':
     N_UPDATES = args.n_updates
     RUN_ID = args.run_id
 
-    target = Util.load_image_as_numpy_array('Mario.png', black_and_white=True, binary=False, sensibility=0.1)
-    target = Util.discretize_target(target, N_SYMBOLS)
-    
-    #target = np.zeros((7,7))
-    ##make a cross
-    #target[:, target.shape[0]//2] = 1
-    #target[target.shape[1]//2, :] = 1
-    print(target)
+
+    base_folder = 'Face'
+    target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
 
 
-
-
     # SET FOLDERS
-    base_folder = 'EXP'
     os.makedirs(base_folder, exist_ok=True)
     folder_path = os.path.join(base_folder, f'Run_{RUN_ID}')
     os.makedirs(folder_path, exist_ok=True)
@@ -147,6 +139,7 @@ if __name__ == '__main__':
 
     data = b.data
     print(data[-1])
+
     Visuals.create_visualization_grid(data, filename=f'{folder_path}/animation', duration=100, gif=True, video=False)
     Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
     Visuals.visualize_evolution_results(result_path=f'{folder_path}/evolution_rewards.json', filename=f'{folder_path}/Best_rewards.png')
