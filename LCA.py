@@ -58,6 +58,13 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
 
     return best_params
 
+
+
+
+
+
+
+
 if __name__ == '__main__':
     seed = np.random.randint(0, 100000000)
     np.random.seed(seed)
