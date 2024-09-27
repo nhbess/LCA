@@ -32,7 +32,7 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.00, sigma_init=0.5)
     results = {'REWARDS': []}
     
     for g in range(n_generations):
@@ -46,7 +46,7 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
         result = solver.result()
         
         best_params, best_reward, curr_reward, sigma = result[0], result[1], result[2], result[3]
-        #print(f'G:{g}, BEST PARAMS, BEST REWARD: {best_reward}, CURRENT REWARD: {curr_reward}')
+        print(f'G:{g}, BEST PARAMS, BEST REWARD: {best_reward}, CURRENT REWARD: {curr_reward}')
         
         #results['BEST'].append(best_params.tolist())
         results['REWARDS'].append(fitness_list.tolist())
@@ -58,9 +58,6 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
         json.dump(results, f)
 
     return best_params
-
-
-
 
 
 def run(args):
@@ -137,9 +134,9 @@ if __name__ == '__main__':
 
     # Define the parameters with default values
     parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=10,       help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default= 10,      help='Population size')
-    parser.add_argument('--n_generations',      type=int, default= 2,      help='Number of generations')
+    parser.add_argument('--n_production_rules', type=int, default=10,        help='Number of production rules')
+    parser.add_argument('--pop_size',           type=int, default=100,      help='Population size')
+    parser.add_argument('--n_generations',      type=int, default=200,      help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
     parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
 
