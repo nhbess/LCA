@@ -1,0 +1,10 @@
+sed: -e expression #1, char 2: invalid usage of line address 0
+(5_w,10)-aCMA-ES (mu_w=3.2,w_1=45%) in dimension 180 (seed=393611, Thu Sep 26 19:37:59 2024)
+[[0 0 0 0 1 0 1 0]
+ [0 0 0 0 0 1 1 0]
+ [0 0 1 1 1 0 1 0]
+ [1 0 0 0 1 1 1 0]
+ [0 0 1 0 0 1 1 0]
+ [0 0 1 0 1 0 1 0]
+ [0 0 1 1 0 1 0 1]
+ [0 0 0 0 0 0 0 0]]

@@ -76,7 +76,7 @@ def run(args):
     RUN_ID = args.run_id
 
 
-    base_folder = 'Face2'
+    base_folder = 'Face'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
