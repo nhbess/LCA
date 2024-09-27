@@ -26,6 +26,7 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
     #result = np.array([np.where(r == 1, 1, 0) for r in result])
 
     loss = np.mean(np.square(target - result[-1])) # L2 loss
+    #loss = np.mean(np.square(target - result[-1])) # L2 loss
     #loss = np.sum(np.square(result - target), axis=1).sum()  #Accumulated L2 loss
     reward = -loss
     return reward
@@ -134,9 +135,9 @@ if __name__ == '__main__':
 
     # Define the parameters with default values
     parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=10,        help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default=100,      help='Population size')
-    parser.add_argument('--n_generations',      type=int, default=200,      help='Number of generations')
+    parser.add_argument('--n_production_rules', type=int, default=8,        help='Number of production rules')
+    parser.add_argument('--pop_size',           type=int, default=150,      help='Population size')
+    parser.add_argument('--n_generations',      type=int, default=300,      help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
     parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
 
