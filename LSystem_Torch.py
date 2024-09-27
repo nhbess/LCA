@@ -11,7 +11,12 @@ class LS:
                  device='cpu') -> None:
         
         self.symbols = torch.arange(n_symbols, device=device)
-        
+        #apply softmax to the production rules
+        print(f'production_rules: {production_rules}')
+        signs = torch.tanh(production_rules*100)*(len(self.symbols)-1)
+        print(f'signs: {signs}')
+
+        sys.exit()
         self.P = self._map_to_symbols(production_rules).view(-1, 2, 3, 3)
         self._correct_P()
 
@@ -89,9 +94,9 @@ if __name__ == '__main__':
     n = 5
     m = 5
     n_symbols = 2
-    n_production_rules = 2
+    n_production_rules = 4
 
-    production_rules = torch.rand(n_production_rules * 2 * 3 * 3) * 2 - 1
+    production_rules = torch.rand(n_production_rules )*2-1#* 2 * 3 * 3) * 2 - 1
     ls = LS(n, m, n_symbols, n_production_rules, production_rules)
 
     ls.update()
