@@ -19,13 +19,6 @@ def loss_function(params: torch.Tensor,
     
     #print(f'target:\n{target}')
     #print(f'ls.B:\n{ls.B}')
-    print(f'ls.B shape: {ls.B.shape}')
-    print(ls.data)
-    #make ls data into a torch tensor
-    data = [d.detach().cpu().numpy() for d in ls.data]
-    data = torch.tensor(data, device=params.device, dtype=torch.float32)
-    #l2 loss
-    sys.exit()
     loss = torch.sum((target - ls.B) ** 2)
     
     return loss
@@ -78,10 +71,10 @@ if __name__ == '__main__':
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
     
     N_PRODUCTION_RULES = 8
-    N_UPDATES = 12
+    N_UPDATES = 16
     
     rules, losses = train(target=target, 
-            training_steps=100,
+            training_steps=300,
             n_updates = N_UPDATES,
             )
     n,m = target.shape
