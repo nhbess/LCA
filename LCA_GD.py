@@ -11,8 +11,9 @@ def loss_function(params: torch.Tensor,
                   target: torch.Tensor,
                   n_updates: int) -> torch.Tensor:
     
-    n,m = target.shape
-    ls = LS(n=n, m=m, production_rules=params, n_production_rules=N_PRODUCTION_RULES, device = params.device)
+    n, m = target.shape
+    ls = LS(n=n, m=m, production_rules=params, n_production_rules=N_PRODUCTION_RULES, device=params.device)
+    
     for _ in range(n_updates):
         ls.update()
 
@@ -43,8 +44,8 @@ def train(target: torch.Tensor,
     n_milestones = 4
     milestones = np.linspace(0, training_steps, n_milestones, endpoint=False, dtype=int)
     LR = 0.01
-    optimizer = torch.optim.Adam([production_rules], lr=lr_max, weight_decay=0.0)
-    scheduler = MultiStepLR(optimizer=optimizer, milestones=milestones, gamma=gamma)
+    optimizer = torch.optim.Adam([production_rules], lr=LR, weight_decay=0.0)
+    #scheduler = MultiStepLR(optimizer=optimizer, milestones=milestones, gamma=gamma)
         
     LOSSES = []
     for step in range(training_steps):
@@ -60,10 +61,10 @@ def train(target: torch.Tensor,
 
 
         optimizer.step()
-        scheduler.step()
+        #scheduler.step()
 
         LOSSES.append(loss.item())
-        print(f'Step {step}, Loss: {loss.item()}, Learning rate: {scheduler.get_last_lr()}')
+        print(f'Step {step}, Loss: {loss.item()}')#, Learning rate: {scheduler.get_last_lr()}')
 
     return production_rules, LOSSES
     
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     N_UPDATES = 20
     
     rules, losses = train(target=target, 
-            training_steps=1,
+            training_steps=10,
             n_updates = N_UPDATES,
             )
     

@@ -43,12 +43,14 @@ class LS:
         self.products = self.products.to(self.device)
 
     def _handle_products(self, products: torch.Tensor) -> torch.Tensor:
+        return products
         negatives_mask = (products <0).float()
         positives_mask = (products >0).float()
         products = positives_mask - negatives_mask
         return products
 
     def _handle_reactants(self, reactants: torch.Tensor) -> torch.Tensor:
+        return reactants
         positive_mask = (reactants >0).float()
         reactants = positive_mask
         clean_mask = torch.ones_like(reactants)        
@@ -58,25 +60,28 @@ class LS:
         reactants = reactants * clean_mask + seed_mask
         return reactants
     
+    import torch.nn.functional as F
+
     def update(self):
         new_board = torch.zeros_like(self.B, requires_grad=True)
         B_unsqueezed = self.B.unsqueeze(0).unsqueeze(0).float()  # Convert to float
         for i in range(self.n_production_rules):
             reactant = self.reactants[i].unsqueeze(0).unsqueeze(0)  # Ensure float
             reaction = F.conv2d(B_unsqueezed, reactant, padding=1)  # Use padding=1 for full matrix sliding
-
+            print(f'reaction: {reaction.grad_fn}')
             sum_kernel = torch.sum(reactant)
-            mask = (reaction == sum_kernel)  # Keep as boolean, no need to cast to float yet
+            mask = (reaction == sum_kernel).float()  # Keep mask as float to propagate gradients
+            mask.requires_grad = True
             product = self.products[i].unsqueeze(0).unsqueeze(0)  # Ensure float tensors
-            
-            # Apply mask using multiplication, which should preserve gradients
-            production = F.conv2d(mask.float(), product, padding=1)  # Convert to float here
+
+            production = F.conv2d(mask, product, padding=1)  # Use float mask to ensure gradient flow
             new_board = new_board + production.squeeze(0).squeeze(0)
-            
+
         self.B = self.B + new_board
-        self.B = torch.clamp(self.B, 0, 1)
+        self.B = torch.clamp(self.B, 0, 1)  # torch.clamp preserves gradients, but make sure all operations before it are differentiable
         self.data.append(self.B.clone())
         return
+
 
 
    
