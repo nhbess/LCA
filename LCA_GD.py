@@ -13,12 +13,9 @@ def loss_function(params: torch.Tensor,
     
     n,m = target.shape
     ls = LS(n=n, m=m, production_rules=params, n_production_rules=N_PRODUCTION_RULES, device = params.device)
-    #print(f'params:\n{params}')
     for _ in range(n_updates):
         ls.update()
-    
-    #print(f'target:\n{target}')
-    #print(f'ls.B:\n{ls.B}')
+
     loss = torch.sum((target - ls.B) ** 2)
     
     return loss
@@ -35,7 +32,12 @@ def train(target: torch.Tensor,
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3  # reactants and products    
 
     production_rules = torch.randn(N_PARAMETERS, requires_grad=True, device=device)
-
+    
+    if production_rules.grad is not None:
+        print('Gradient in production rules before LS')
+        production_rules.grad
+    else: print('No gradient in production rules before LS')
+    
     gamma = 0.4
     lr_max = 0.1/gamma
     n_milestones = 4
@@ -51,10 +53,10 @@ def train(target: torch.Tensor,
         optimizer.zero_grad()
         loss = loss_function(production_rules, target, n_updates)
         loss.backward()
-        #if production_rules.grad is not None:
-        #    production_rules.grad.data[torch.isnan(production_rules.grad.data)] = 1.0
+
+        if production_rules.grad is not None:
             #production_rules.grad.data = torch.clamp(production_rules.grad.data, min=-1.0, max=1.0)
-            #print(f'grad: {production_rules.grad.data}')
+            print(f'grad: {production_rules.grad.data}')
 
 
         optimizer.step()
@@ -70,19 +72,23 @@ if __name__ == '__main__':
     base_folder = 'Face2'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
     
-    N_PRODUCTION_RULES = 10
-    N_UPDATES = 16
+    N_PRODUCTION_RULES = 5
+    N_UPDATES = 20
     
     rules, losses = train(target=target, 
-            training_steps=300,
+            training_steps=1,
             n_updates = N_UPDATES,
             )
+    
+    sys.exit()
     n,m = target.shape
 
     ls = LS(n=n, m=m, production_rules=rules, n_production_rules=N_PRODUCTION_RULES)
     for _ in range(N_UPDATES):
         ls.update()
 
+    print(ls.reactants)
+    print(ls.products)
 
     data = [d.detach().cpu().numpy() for d in ls.data]
     
