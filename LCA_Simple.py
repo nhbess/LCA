@@ -33,7 +33,7 @@ def _reward_function_individual(individual:np.array, target:np.array, n_symbols:
 
 def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_generations=100, popsize=20, folder:str = 'test'):
     
-    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.00, sigma_init=0.5)
+    solver = es.CMAES(num_params=num_params, popsize=popsize, weight_decay=0.01, sigma_init=0.5)
     results = {'REWARDS': []}
     
     for g in range(n_generations):
@@ -61,23 +61,31 @@ def evolve(target:np.array, num_params:int, n_symbols:int, n_updates:int, n_gene
     return best_params
 
 
-def run(args):
+
+if __name__ == '__main__':
     seed = np.random.randint(0, 100000000)
     np.random.seed(seed)
 
     # Assign the parsed values to variables
-    N_SYMBOLS = args.n_symbols
-    N_PRODUCTION_RULES = args.n_production_rules
-    POP_SIZE = args.pop_size
-    N_GENERATIONS = args.n_generations
-    N_UPDATES = args.n_updates
-    RUN_ID = args.run_id
+    N_SYMBOLS = 2
+    N_PRODUCTION_RULES = 3
+    POP_SIZE = 500
+    N_GENERATIONS = 300
+    N_UPDATES = 10
+    RUN_ID = 0
 
 
-    base_folder = 'Face2'
-    target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
-
+    base_folder = 'LilFace'
+    target = np.array([[0, 1, 1, 1, 1, 0],
+                       [1, 0, 1, 1, 0, 1],
+                       [1, 1, 1, 1, 1, 1],
+                       [1, 0, 1, 1, 0, 1],
+                       [1, 1, 0, 0, 1, 1],
+                       [0, 1, 1, 1, 1, 0],
+                        ])
     X,Y = target.shape
+
+
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3 # reactants and products
 
     # SET FOLDERS
@@ -127,20 +135,3 @@ def run(args):
     Visuals.create_visualization_grid(data, filename=f'{folder_path}/animation', duration=100, gif=True, video=False)
     Visuals.visualize_target_result(target, data, filename=f'{folder_path}/Result.png')
     Visuals.visualize_evolution_results(result_path=f'{folder_path}/evolution_rewards.json', filename=f'{folder_path}/Best_rewards.png')
-
-
-if __name__ == '__main__':
-    # Setup argument parser
-    parser = argparse.ArgumentParser()
-
-    # Define the parameters with default values
-    parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=20,        help='Number of production rules')
-    parser.add_argument('--pop_size',           type=int, default=150,      help='Population size')
-    parser.add_argument('--n_generations',      type=int, default=300,      help='Number of generations')
-    parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')
-    parser.add_argument('--run_id',             type=int, default=0,        help='run_id')
-
-    # Parse the arguments
-    args = parser.parse_args()
-    run(args)

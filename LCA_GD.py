@@ -3,19 +3,19 @@ import numpy as np
 import Util
 import sys
 from LSystem_Torch import LS
+from torch.optim.lr_scheduler import MultiStepLR
 
 np.set_printoptions(precision=2, suppress=True)
 
-def loss_function(ls :LS,
-                  params: torch.Tensor, 
+def loss_function(params: torch.Tensor, 
                   target: torch.Tensor,
                   n_updates: int) -> torch.Tensor:
     
-    ls.reset(params)
+    n, m = target.shape
+    ls = LS(n=n, m=m, production_rules=params, n_production_rules=N_PRODUCTION_RULES, device=params.device)
+    
     for _ in range(n_updates):
         ls.update()
-    
-    ls.B.requires_grad = True #WTF?
 
     loss = torch.sum((target - ls.B) ** 2)
     
@@ -24,45 +24,80 @@ def loss_function(ls :LS,
 
 def train(target: torch.Tensor, 
           training_steps: int,
-          n_symbols: int,
           n_updates: int):
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
     target = torch.tensor(target, device=device, dtype=torch.float32)
     X, Y = target.shape
     N_PARAMETERS = N_PRODUCTION_RULES * 2 * 3 * 3  # reactants and products    
-    params = torch.randn(N_PARAMETERS, requires_grad=True, device=device)
 
-    print(f'params.grad: {params.grad} params.requires_grad: {params.requires_grad}')
-
-    optimizer = torch.optim.Adam([params], lr=0.01)
-
-    ls = LS(X, Y, n_symbols, n_production_rules=N_PRODUCTION_RULES, production_rules=params, device=device)    
-
+    production_rules = torch.randn(N_PARAMETERS, requires_grad=True, device=device)
+    
+    if production_rules.grad is not None:
+        print('Gradient in production rules before LS')
+        production_rules.grad
+    else: print('No gradient in production rules before LS')
+    
+    gamma = 0.4
+    lr_max = 0.1/gamma
+    n_milestones = 4
+    milestones = np.linspace(0, training_steps, n_milestones, endpoint=False, dtype=int)
+    LR = 0.01
+    optimizer = torch.optim.Adam([production_rules], lr=LR, weight_decay=0.0)
+    #scheduler = MultiStepLR(optimizer=optimizer, milestones=milestones, gamma=gamma)
+        
+    LOSSES = []
     for step in range(training_steps):
+        #print current learning rate
 
         optimizer.zero_grad()
-        loss = loss_function(ls, params, target, n_updates)
+        loss = loss_function(production_rules, target, n_updates)
         loss.backward()
+
+        if production_rules.grad is not None:
+            #production_rules.grad.data = torch.clamp(production_rules.grad.data, min=-1.0, max=1.0)
+            print(f'grad: {production_rules.grad.data}')
+
+
         optimizer.step()
+        #scheduler.step()
 
-        print(f'Step {step}, Loss: {loss.item()}')
+        LOSSES.append(loss.item())
+        print(f'Step {step}, Loss: {loss.item()}')#, Learning rate: {scheduler.get_last_lr()}')
 
-    return params.detach().cpu().numpy()
+    return production_rules, LOSSES
     
 if __name__ == '__main__':
     
-    base_folder = 'Face'
+    base_folder = 'Face2'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
     
-    N_SYMBOLS = 2
     N_PRODUCTION_RULES = 5
-    N_UPDATES = 25
+    N_UPDATES = 20
     
-    rules = train(target=target, 
+    rules, losses = train(target=target, 
             training_steps=10,
-            n_symbols = N_SYMBOLS,
             n_updates = N_UPDATES,
             )
     
-    print(rules)
+    sys.exit()
+    n,m = target.shape
+
+    ls = LS(n=n, m=m, production_rules=rules, n_production_rules=N_PRODUCTION_RULES)
+    for _ in range(N_UPDATES):
+        ls.update()
+
+    print(ls.reactants)
+    print(ls.products)
+
+    data = [d.detach().cpu().numpy() for d in ls.data]
+    
+    import Visuals
+    Visuals.create_visualization_grid(data, filename=f'GD_animation', duration=100, gif=True, video=False)
+    Visuals.visualize_target_result(target, data, filename=f'GD_Result.png')
+    #plot losses
+    import matplotlib.pyplot as plt
+    plt.plot(losses)
+    plt.savefig('GD_losses.png')
+    plt.show()

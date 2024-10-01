@@ -1,0 +1,3 @@
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
+https://machinelearningmastery.com/dual-annealing-optimization-with-python/
+https://docs.python-mip.com/en/latest/examples.html
