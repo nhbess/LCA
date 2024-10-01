@@ -6,25 +6,21 @@ class LS:
                  n: int, 
                  m: int,
                  production_rules: torch.Tensor,
-                 n_production_rules: int = 2, 
+                 n_production_rules: int, 
                  device='cpu') -> None:
         
         self.M = 1
         self.n_production_rules = n_production_rules
         self.production_rules = production_rules
-        #clamp the production rules to -1, 1
+        
         self.production_rules = torch.clamp(self.production_rules, -1, 1)
         reactants, products = torch.split(production_rules, production_rules.shape[0] // 2)
         self.reactants = self._handle_reactants(reactants).view(n_production_rules, 3, 3)
         self.products = self._handle_products(products).view(n_production_rules, 3, 3)
 
-        #print(f'reactants:\n{self.reactants}')
-        #print(f'products:\n{self.products}')
-
-        #self.products = self.products.clamp(0, 1)
-        #self.reactants = self.reactants.clamp(-1, 1)
 
         board = torch.zeros((n, m), dtype=torch.float32, requires_grad=True)
+
         seed_mask = torch.zeros_like(board)
         seed_mask[board.shape[0]//2, board.shape[1]//2] = 1
         self.B = board + seed_mask

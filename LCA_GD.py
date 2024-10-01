@@ -37,12 +37,12 @@ def train(target: torch.Tensor,
     production_rules = torch.randn(N_PARAMETERS, requires_grad=True, device=device)
 
     gamma = 0.4
-    lr_max = 0.5/gamma
-    n_milestones = 8
+    lr_max = 0.1/gamma
+    n_milestones = 4
     milestones = np.linspace(0, training_steps, n_milestones, endpoint=False, dtype=int)
     LR = 0.01
-    optimizer = torch.optim.Adam([production_rules], lr=LR, weight_decay=0.0)
-    #scheduler = MultiStepLR(optimizer=optimizer, milestones=milestones, gamma=gamma)
+    optimizer = torch.optim.Adam([production_rules], lr=lr_max, weight_decay=0.0)
+    scheduler = MultiStepLR(optimizer=optimizer, milestones=milestones, gamma=gamma)
         
     LOSSES = []
     for step in range(training_steps):
@@ -58,10 +58,10 @@ def train(target: torch.Tensor,
 
 
         optimizer.step()
-        #scheduler.step()
+        scheduler.step()
 
         LOSSES.append(loss.item())
-        print(f'Step {step}, Loss: {loss.item()}')#, Learning rate: {scheduler.get_last_lr()}')
+        print(f'Step {step}, Loss: {loss.item()}, Learning rate: {scheduler.get_last_lr()}')
 
     return production_rules, LOSSES
     
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     base_folder = 'Face2'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
     
-    N_PRODUCTION_RULES = 8
+    N_PRODUCTION_RULES = 10
     N_UPDATES = 16
     
     rules, losses = train(target=target, 
