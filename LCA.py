@@ -74,7 +74,7 @@ def run(args):
     RUN_ID = args.run_id
 
 
-    base_folder = 'Face2'
+    base_folder = 'Alien'
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     # Define the parameters with default values
     parser.add_argument('--n_symbols',          type=int, default=2,        help='Number of symbols')
-    parser.add_argument('--n_production_rules', type=int, default=20,        help='Number of production rules')
+    parser.add_argument('--n_production_rules', type=int, default=30,       help='Number of production rules')
     parser.add_argument('--pop_size',           type=int, default=150,      help='Population size')
     parser.add_argument('--n_generations',      type=int, default=300,      help='Number of generations')
     parser.add_argument('--n_updates',          type=int, default=30,       help='Number of updates')

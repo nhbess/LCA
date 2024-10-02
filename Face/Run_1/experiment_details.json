@@ -1,0 +1,9 @@
+{
+    "N_SYMBOLS": 2,
+    "N_PRODUCTION_RULES": 30,
+    "POP_SIZE": 200,
+    "N_GENERATIONS": 500,
+    "N_UPDATES": 30,
+    "SEED": 13292203,
+    "TIME": 5.794070187078582
+}
