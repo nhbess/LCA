@@ -79,23 +79,23 @@ class LS:
         self.data.append(self.B.copy())
 
 if __name__ == '__main__':
-    pass
-    #seed = np.random.randint(0, 100000000) 
-    ##seed = 25576077 
-    #np.random.seed(seed)
-    #print(f'Seed: {seed}')
-    #Y = 10
-    #X = Y   #int(Y/ratio)
-    #RUNS = 50
-    #N_PRODUCTION_RULES = 20
-    #N_SYMBOLS = 2
-    #N_PARAMETERS =  N_PRODUCTION_RULES * 2 * 3 * 3
-#
-    #P = np.random.rand(N_PARAMETERS)*2 - 1
-    #for run in range(1):
-    #    b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=None, production_rules=P)
-    #    for i in range(Y*2):
-    #        b.update()
-    #        #print(b.B)
-    #    data = b.data
-    #    Visuals.create_visualization_grid(data, filename=f'Test', duration=100, gif=True, video=False)
+    seed = np.random.randint(0, 100000000) 
+    #seed = 25576077 
+    np.random.seed(seed)
+    print(f'Seed: {seed}')
+    Y = 10
+    X = Y   #int(Y/ratio)
+    RUNS = 50
+    N_PRODUCTION_RULES = 20
+    N_SYMBOLS = 2
+    N_PARAMETERS =  N_PRODUCTION_RULES * 2 * 3 * 3
+
+    P = np.random.rand(N_PARAMETERS)*2 - 1
+    for run in range(1):
+        b = LS(n=X, m=Y,n_symbols=N_SYMBOLS, n_production_rules=None, production_rules=P)
+        for i in range(Y*2):
+            b.update()
+            print(b.P)
+            sys.exit()
+        data = b.data
+        Visuals.create_visualization_grid(data, filename=f'Test', duration=100, gif=True, video=False)

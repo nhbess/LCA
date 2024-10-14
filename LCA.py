@@ -75,6 +75,10 @@ def run(args):
 
 
     base_folder = 'Alien'
+    day = time.strftime("%Y-%m-%d")
+    day += time.strftime("_%H-%M")
+
+
     target = Util.load_simple_image_as_numpy_array(f'__ASSETS/{base_folder}.png')
 
     X,Y = target.shape
@@ -118,6 +122,8 @@ def run(args):
     #with open(f'{folder_path}/model.pkl', 'wb') as f:
     #    pickle.dump(b, f)
     
+    print(b.P)
+    sys.exit()
     for i in range(N_UPDATES):
         b.update()
 

@@ -106,5 +106,16 @@ def plot_frame(data, filename, cmap='Blues'):
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
 
+
+def visual_perfect_pixel(data, filename):    
+    images = []
+    
+    for img_data in data:
+        img_data_scaled = (img_data * 255).astype(np.uint8)
+        images.append(img_data_scaled)
+        
+    imageio.mimsave(f'{filename}.gif', images, duration=50, loop=True)
+
+
 if __name__ == '__main__':
     pass
